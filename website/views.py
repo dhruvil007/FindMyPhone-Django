@@ -5,12 +5,14 @@ from django.contrib.auth.models import User
 from app.models import Device
 
 # Create your views here.
+TEMPLATE_PATH = '/Users/dhruvilmehta/PycharmProjects/FindMyPhone-Django2/website/templates/website/'
+
 username = 'student'
 
 
 def index(request):
     user_login(request)
-    return render(request, 'website/home.html', {})
+    return render(request, TEMPLATE_PATH + 'home.html', {})
 
 
 def user_login(request):
@@ -25,21 +27,21 @@ def user_login(request):
                 print(user_details)
                 login(request, user)
                 print('Success')
-                return render(request, 'website/googlemaps.html', user_details)
+                return render(request, TEMPLATE_PATH + 'googlemaps.html', user_details)
             else:
                 print('Account blocked')
-                return render(request, 'website/home.html', {})
+                return render(request, TEMPLATE_PATH + 'home.html', {})
         else:
             print('Wrong details entered')
-            return render(request, 'website/home.html', {})
+            return render(request, TEMPLATE_PATH + 'home.html', {})
     else:
         print('POST method not working')
-        return render(request, 'website/home.html', {})
+        return render(request, TEMPLATE_PATH + 'home.html', {})
 
 
 def get_location(request):
     # recieve_data(request)
-    return render(request, 'website/googlemaps.html', {})
+    return render(request, TEMPLATE_PATH + 'googlemaps.html', {})
 
 
 def recieve_data(request):
@@ -55,7 +57,7 @@ def recieve_data(request):
         device.latitude = current_latitude
         device.longitude = current_longitude
         device.save()
-        return render(request, 'website/googlemaps.html', location)
+        return render(request, TEMPLATE_PATH + 'googlemaps.html', location)
     else:
         print('POST method not identified')
-        return render(request, 'website/googlemaps.html', {})
+        return render(request, TEMPLATE_PATH + 'googlemaps.html', {})
