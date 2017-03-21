@@ -3,4 +3,6 @@ from . import views
 
 urlpatterns = [
     url(r'^ring/$', views.make_phone_ring, name='make_phone_ring'),
+    url(r'^login/$', views.login, name='login'),
+
 ]

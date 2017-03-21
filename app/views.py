@@ -2,20 +2,27 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
 from rest_framework import status
 import requests
 import json
 from rest_framework.response import Response
 from .models import Device
+from rest_framework.decorators import api_view
 
 
+@csrf_exempt
+@api_view(['GET', 'POST', ])
 def login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
+        print('' + username + ' ' + password)
         registration_id = request.POST.get('token')
         user = authenticate(username=username, password=password)
         if user:
+            print('User is correct')
+            print('' + registration_id)
             device = Device(user=user, registration_id=registration_id)
             device.save()
             return Response('login successful', status=status.HTTP_202_ACCEPTED)

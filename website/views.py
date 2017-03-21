@@ -3,6 +3,8 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.contrib.auth.models import User
 from app.models import Device
+import requests
+import json
 
 # Create your views here.
 TEMPLATE_PATH = '/Users/dhruvilmehta/PycharmProjects/FindMyPhone-Django2/website/templates/website/'
@@ -18,6 +20,7 @@ def index(request):
 def user_login(request):
     if request.method == 'POST':
         global username
+        print("Hey hey hey")
         username = request.POST.get('username')
         password = request.POST.get('password')
         user = authenticate(username=username, password=password)
@@ -41,6 +44,16 @@ def user_login(request):
 
 def get_location(request):
     # recieve_data(request)
+    print('' + request.user.username)
+    user = request.user
+    device = Device.objects.get(user=user)
+    registration_id = device.registration_id
+    print(registration_id)
+    data = {'to': registration_id,
+            'data': {'message': 'Press the button at the bottom to locate the phone.',
+                     'ring': 'false',
+                     'location': 'true'}}
+    make_post_request(data)
     return render(request, TEMPLATE_PATH + 'googlemaps.html', {})
 
 
@@ -61,3 +74,28 @@ def recieve_data(request):
     else:
         print('POST method not identified')
         return render(request, TEMPLATE_PATH + 'googlemaps.html', {})
+
+
+def make_post_request(data):
+    url = 'http://fcm.googleapis.com/fcm/send'
+    headers = {'Content-Type': 'application/json',
+               'Authorization': 'key=AIzaSyD6OB2ifrTrO4oMTUhJZwv7eexR39tFY0A',
+               'Connection': 'close'}
+
+    response = requests.post(url, data=json.dumps(data), headers=headers)
+    print(response)
+
+
+def make_phone_ring(request):
+    user = request.user
+    # user = User.objects.get(username='dhruvil')
+    device = Device.objects.get(user=user)
+    registration_id = device.registration_id
+    print(registration_id)
+    data = {'to':registration_id,
+            'data':{'message':'Press the button at the bottom to locate the phone.',
+                    'ring':'true',
+                    'location': 'false'}}
+    make_post_request(data)
+    return HttpResponse("Done")
+
