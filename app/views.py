@@ -12,7 +12,7 @@ from rest_framework.decorators import api_view
 
 
 @csrf_exempt
-@api_view(['GET', 'POST', ])
+@api_view(['POST',])
 def login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -23,8 +23,7 @@ def login(request):
         if user:
             print('User is correct')
             print('' + registration_id)
-            device = Device(user=user, registration_id=registration_id)
-            device.save()
+            device = Device.objects.get_or_create(user=user, registration_id=registration_id)
             return Response('login successful', status=status.HTTP_202_ACCEPTED)
         else:
             return Response('login unsuccessful', status=status.HTTP_401_UNAUTHORIZED)

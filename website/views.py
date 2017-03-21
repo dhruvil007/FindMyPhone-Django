@@ -2,6 +2,9 @@ from django.contrib.auth import authenticate, login
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.contrib.auth.models import User
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.decorators import api_view
+
 from app.models import Device
 import requests
 import json
@@ -20,7 +23,6 @@ def index(request):
 def user_login(request):
     if request.method == 'POST':
         global username
-        print("Hey hey hey")
         username = request.POST.get('username')
         password = request.POST.get('password')
         user = authenticate(username=username, password=password)
@@ -44,32 +46,33 @@ def user_login(request):
 
 def get_location(request):
     # recieve_data(request)
-    print('' + request.user.username)
     user = request.user
     device = Device.objects.get(user=user)
     registration_id = device.registration_id
-    print(registration_id)
     data = {'to': registration_id,
-            'data': {'message': 'Press the button at the bottom to locate the phone.',
+            'data': {'message': 'Location sent',
                      'ring': 'false',
                      'location': 'true'}}
     make_post_request(data)
     return render(request, TEMPLATE_PATH + 'googlemaps.html', {})
 
 
-def recieve_data(request):
-    location = {}
+@csrf_exempt
+@api_view(['POST',])
+def receive_location(request):
+    # location= {}
     if request.method == 'POST':
-        current_latitude = request.POST.get('current_latitude')
+        current_latitude = request.POST.get('latitude')
         print(current_latitude)
-        current_longitude = request.POST.get('current_longitude')
+        current_longitude = request.POST.get('longitude')
         print(current_longitude)
         location = {'latitude': current_latitude, 'longitude': current_longitude}
-        user = User.objects.get(username=username)
-        device = Device.objects.get(user=user)
-        device.latitude = current_latitude
-        device.longitude = current_longitude
-        device.save()
+        # print(username)
+        # user = User.objects.get(username=username)
+        # device = Device.objects.get(user=user)
+        # device.latitude = current_latitude
+        # device.longitude = current_longitude
+        # device.save()
         return render(request, TEMPLATE_PATH + 'googlemaps.html', location)
     else:
         print('POST method not identified')
@@ -91,7 +94,6 @@ def make_phone_ring(request):
     # user = User.objects.get(username='dhruvil')
     device = Device.objects.get(user=user)
     registration_id = device.registration_id
-    print(registration_id)
     data = {'to':registration_id,
             'data':{'message':'Press the button at the bottom to locate the phone.',
                     'ring':'true',
