@@ -3,7 +3,11 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework import status
 from rest_framework.decorators import api_view
+import json
+
+from rest_framework.response import Response
 
 from app.models import Device
 import requests
@@ -45,7 +49,7 @@ def user_login(request):
 
 
 def get_location(request):
-    # recieve_data(request)
+    # receive_data(request)
     user = request.user
     device = Device.objects.get(user=user)
     registration_id = device.registration_id
@@ -57,36 +61,14 @@ def get_location(request):
     return render(request, TEMPLATE_PATH + 'googlemaps.html', {})
 
 
-@csrf_exempt
-@api_view(['POST',])
-def receive_location(request):
-    # location= {}
-    if request.method == 'POST':
-        current_latitude = request.POST.get('latitude')
-        print(current_latitude)
-        current_longitude = request.POST.get('longitude')
-        print(current_longitude)
-        location = {'latitude': current_latitude, 'longitude': current_longitude}
-        # print(username)
-        # user = User.objects.get(username=username)
-        # device = Device.objects.get(user=user)
-        # device.latitude = current_latitude
-        # device.longitude = current_longitude
-        # device.save()
-        return render(request, TEMPLATE_PATH + 'googlemaps.html', location)
-    else:
-        print('POST method not identified')
-        return render(request, TEMPLATE_PATH + 'googlemaps.html', {})
-
-
-def make_post_request(data):
-    url = 'http://fcm.googleapis.com/fcm/send'
-    headers = {'Content-Type': 'application/json',
-               'Authorization': 'key=AIzaSyD6OB2ifrTrO4oMTUhJZwv7eexR39tFY0A',
-               'Connection': 'close'}
-
-    response = requests.post(url, data=json.dumps(data), headers=headers)
-    print(response)
+def refresh_location(request):
+    user = request.user
+    device = Device.objects.get(user=user)
+    latitude = device.latitude
+    longitude = device.longitude
+    location = {'latitude': latitude, 'longitude': longitude}
+    js_data = json.dumps(location)
+    return render(request, TEMPLATE_PATH + 'googlemaps.html', {'my_js_data': js_data})
 
 
 def make_phone_ring(request):
@@ -101,3 +83,12 @@ def make_phone_ring(request):
     make_post_request(data)
     return HttpResponse("Done")
 
+
+def make_post_request(data):
+    url = 'http://fcm.googleapis.com/fcm/send'
+    headers = {'Content-Type': 'application/json',
+               'Authorization': 'key=AIzaSyD6OB2ifrTrO4oMTUhJZwv7eexR39tFY0A',
+               'Connection': 'close'}
+
+    response = requests.post(url, data=json.dumps(data), headers=headers)
+    print(response)

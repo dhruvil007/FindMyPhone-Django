@@ -6,5 +6,6 @@ urlpatterns = [
     url(r'^login/$', views.user_login, name='login'),
     url(r'^locate-phone/$', views.get_location, name='locate-phone'),
     url(r'^make-phone-ring/$', views.make_phone_ring, name='make-phone-ring'),
-    url(r'^receive-location/$', views.receive_location, name='receive-location'),
+    url(r'^ring/$', views.make_phone_ring, name='make_phone_ring'),
+    url(r'^refresh-location/$', views.refresh_location, name='refresh_location'),
 ]

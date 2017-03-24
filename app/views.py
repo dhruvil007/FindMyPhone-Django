@@ -12,7 +12,7 @@ from rest_framework.decorators import api_view
 
 
 @csrf_exempt
-@api_view(['POST',])
+@api_view(['POST', ])
 def login(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -31,25 +31,25 @@ def login(request):
         return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-def make_post_request(data):
-    url = 'http://fcm.googleapis.com/fcm/send'
-    headers = {'Content-Type': 'application/json',
-               'Authorization': 'key=AIzaSyD6OB2ifrTrO4oMTUhJZwv7eexR39tFY0A',
-               'Connection': 'close'}
-
-    response = requests.post(url, data=json.dumps(data), headers=headers)
-    print(response)
-
-
-def make_phone_ring(request):
-    # user = request.user
-    user = User.objects.get(username='dhruvil')
-    device = Device.objects.get(user=user)
-    registration_id = device.registration_id
-    print(registration_id)
-    data = {'to':registration_id,
-            'data':{'message':'Press the button at the bottom to locate the phone.',
-                    'ring':'true'}}
-    make_post_request(data)
-    return HttpResponse("Done")
-
+@csrf_exempt
+@api_view(['POST', ])
+def receive_location(request):
+    # location= {}
+    if request.method == 'POST':
+        current_latitude = request.POST.get('latitude')
+        print(current_latitude)
+        current_longitude = request.POST.get('longitude')
+        print(current_longitude)
+        username = request.POST.get('username')
+        print(username)
+        location = {'latitude': current_latitude, 'longitude': current_longitude}
+        user = User.objects.get(username=username)
+        device = Device.objects.get(user=user)
+        device.latitude = current_latitude
+        device.longitude = current_longitude
+        device.save()
+        # js_data = json.dumps(location)
+        # return render(request, TEMPLATE_PATH + 'googlemaps.html', location)
+        return Response("success", status=status.HTTP_200_OK)
+    else:
+        return Response("failure", status=status.HTTP_405_METHOD_NOT_ALLOWED)
